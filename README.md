@@ -1,1 +1,1 @@
-# DigitalNoteTakingApp
+DigitalNoteTakingApp is a Flask-based application designed to streamline the process of managing notes and notebooks digitally. This project offers an intuitive backend structure that supports user account management and operations related to the creation, modification, and organization of notes. Perfect for students, professionals, and anyone looking to keep their thoughts and work organized, DigitalNoteTakingApp provides a comprehensive solution for digital note-taking needs.
