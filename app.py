@@ -29,6 +29,7 @@ class Notebook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notes = db.relationship('Note', backref='notebook', lazy=True)
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -82,6 +83,12 @@ def manage_notes():
     else:
         notes = Note.query.all()
         return jsonify([{'id': note.id, 'content': note.content} for note in notes]), 200
+
+@app.route('/search', methods=['GET'])
+def search_notes():
+    keyword = request.args.get('keyword', '')  # Get keyword from query parameter
+    notes = Note.query.filter(Note.content.like(f'%{keyword}%')).all()  # Search for notes containing the keyword
+    return jsonify([{'id': note.id, 'content': note.content, 'notebook_id': note.notebook_id} for note in notes]), 200
 
 if __name__ == '__main__':
     db.create_all()
