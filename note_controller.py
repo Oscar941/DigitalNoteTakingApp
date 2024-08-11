@@ -4,27 +4,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = getenv("BASE_URL")
+API_BASE_URL = getenv("API_BASE_URL")
 
-def create_note(title, content):
-    payload = {"title": title, "content": content}
-    response = requests.post(f"{BASE_URL}/notes", json=payload)
+def create_note(title, text):
+    data = {"title": title, "content": text}
+    response = requests.post(f"{API_BASE_URL}/notes", json=data)
     return response.json()
 
-def read_note(note_id):
-    response = requests.get(f"{BASE_URL}/notes/{note_id}")
+def get_note_by_id(note_id):
+    response = requests.get(f"{API_BASE_URL}/notes/{note_id}")
     return response.json()
 
-def update_note(note_id, title=None, content=None):
-    payload = {}
-    if title:
-        payload["title"] = title
-    if content:
-        payload["content"] = content
+def update_note_by_id(note_id, new_title=None, new_content=None):
+    updated_data = {}
+    if new_title:
+        updated_data["title"] = new_title
+    if new_content:
+        updated_data["content"] = new_content
 
-    response = requests.put(f"{BASE_URL}/notes/{note_id}", json=payload)
+    response = requests.put(f"{API_BASE_URL}/notes/{note_id}", json=updated_data)
     return response.json()
 
-def delete_note(note_id):
-    response = requests.delete(f"{BASE_URL}/notes/{note_id}")
+def delete_note_by_id(note_id):
+    response = requests.delete(f"{API_BASE_URL}/notes/{note_id}")
     return response.json()
