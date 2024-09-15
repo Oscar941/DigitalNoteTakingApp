@@ -12,18 +12,38 @@ HEADERS = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
+def execute_request(method, url, data=None):
+    try:
+        if method == 'GET':
+            response = requests.get(url, headers=HEADERS)
+        elif method == 'POST':
+            response = requests.post(url, headers=HEADERS, json=data)
+        elif method == 'PUT':
+            response = requests.put(url, headers=HEADERS, json=data)
+        elif method == 'DELETE':
+            response = requests.delete(url, headers=HEADERS)
+        
+        response.raise_for_status()
+    except requests.RequestException as e:
+        return {"error": "Request failed: {}".format(e)}
+
+    try:
+        return response.json()
+    except ValueError:
+        return {"error": "JSON decoding failed"}
+
 def create_notebook(data):
-    response = requests.post(f"{BASE_URL}/notebooks", headers=HEADERS, json=data)
-    return response.json()
+    url = f"{BASE_URL}/notebooks"
+    return execute_request('POST', url, data=data)
 
 def read_notebook(notebook_id):
-    response = requests.get(f"{BASE_URL}/notebooks/{notebook_id}", headers=HEADERS)
-    return response.json()
+    url = f"{BASE_URL}/notebooks/{notebook_id}"
+    return execute_request('GET', url)
 
 def update_notebook(notebook_id, data):
-    response = requests.put(f"{BASE_URL}/notebooks/{notebook_id}", headers=HEADERS, json=data)
-    return response.json()
+    url = f"{BASE_URL}/notebooks/{notebook_id}"
+    return execute_request('PUT', url, data=data)
 
 def delete_notebook(notebook_id):
-    response = requests.delete(f"{BASE_URL}/notebooks/{notebook_id}", headers=HEADERS)
-    return response.json()
+    url = f"{BASE_URL}/notebooks/{notebook_id}"
+    return execute_request('DELETE', url)
