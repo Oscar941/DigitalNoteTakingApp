@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
+import sys
 
 db = SQLAlchemy()
 
@@ -35,6 +37,13 @@ class Notebook(db.Model):
         return '<Notebook %r>' % self.name
 
 def initialize_db(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
+    try:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        db.init_app(app)
+        with app.app_context():
+            db.create_all()
+        print("Database initialized successfully!")
+    except SQLAlchemyError as e:
+        print("Failed to initialize database:", str(e))
+        sys.exit(1) # Exiting the application if DB initialization fails
