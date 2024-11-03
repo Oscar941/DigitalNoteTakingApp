@@ -4,46 +4,46 @@ import sys
 
 db = SQLAlchemy()
 
-class User(db.Model):
-    __tablename__ = 'users'
+class UserAccount(db.Model):
+    __tablename__ = 'user_accounts'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    notes = db.relationship('Note', backref='author', lazy=True)
-    notebooks = db.relationship('Notebook', backref='owner', lazy=True)
+    email_address = db.Column(db.String(120), unique=True, nullable=False)
+    user_notes = db.relationship('UserNote', backref='author', lazy=True)
+    user_notebooks = db.relationship('UserNotebook', backref='owner', lazy=True)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return f'<UserAccount {self.username}>'
 
-class Note(db.Model):
-    __tablename__ = 'notes'
+class UserNote(db.Model):
+    __tablename__ = 'user_notes'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    notebook_id = db.Column(db.Integer, db.ForeignKey('notebooks.id'), nullable=True)
+    note_title = db.Column(db.String(100), nullable=False)
+    note_content = db.Column(db.Text, nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user_accounts.id'), nullable=False)
+    notebook_id = db.Column(db.Integer, db.ForeignKey('user_notebooks.id'), nullable=True)
 
     def __repr__(self):
-        return '<Note %r>' % self.title
+        return f'<UserNote {self.note_title}>'
 
-class Notebook(db.Model):
-    __tablename__ = 'notebooks'
+class UserNotebook(db.Model):
+    __tablename__ = 'user_notebooks'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    notes = db.relationship('Note', backref='notebook', lazy=True)
+    notebook_name = db.Column(db.String(100), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user_accounts.id'), nullable=False)
+    notebook_notes = db.relationship('UserNote', backref='notebook', lazy=True)
 
     def __repr__(self):
-        return '<Notebook %r>' % self.name
+        return f'<UserNotebook {self.notebook_name}>'
 
-def initialize_db(app):
+def initialize_database(application):
     try:
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        db.init_app(app)
-        with app.app_context():
+        application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site_database.db'
+        application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        db.init_app(application)
+        with application.app_context():
             db.create_all()
         print("Database initialized successfully!")
-    except SQLAlchemyError as e:
-        print("Failed to initialize database:", str(e))
-        sys.exit(1) # Exiting the application if DB initialization fails
+    except SQLAlchemyError as error:
+        print("Failed to initialize database:", str(error))
+        sys.exit(1)
