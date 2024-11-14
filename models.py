@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.security import generate_password_hash, check_password_hash
 import sys
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -9,8 +11,15 @@ class UserAccount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email_address = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
     user_notes = db.relationship('UserNote', backref='author', lazy=True)
     user_notebooks = db.relationship('UserNotebook', backref='owner', lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f'<UserAccount {self.username}>'
@@ -20,6 +29,9 @@ class UserNote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     note_title = db.Column(db.String(100), nullable=False)
     note_content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user_accounts.id'), nullable=False)
     notebook_id = db.Column(db.Integer, db.ForeignKey('user_notebooks.id'), nullable=True)
 
@@ -30,6 +42,9 @@ class UserNotebook(db.Model):
     __tablename__ = 'user_notebooks'
     id = db.Column(db.Integer, primary_key=True)
     notebook_name = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user_accounts.id'), nullable=False)
     notebook_notes = db.relationship('UserNote', backref='notebook', lazy=True)
 
