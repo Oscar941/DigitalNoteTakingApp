@@ -7,50 +7,50 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///database.db")
+DB_URI = os.getenv("DATABASE_URI", "sqlite:///database.db")
 
 try:
-    engine = create_engine(DATABASE_URI, convert_unicode=True)
-    db_session = scoped_session(sessionmaker(autocommit=False,
-                                             autoflush=False,
-                                             bind=engine))
-except SQLAlchemyError as e:
-    print(f"Error connecting to the database: {e}")
+    database_engine = create_engine(DB_URI, convert_unicode=True)
+    database_session = scoped_session(sessionmaker(autocommit=False,
+                                                   autoflush=False,
+                                                   bind=database_engine))
+except SQLAlchemyError as error:
+    print(f"Error connecting to the database: {error}")
 
-Base = declarative_base()
-Base.query = db_session.query_property()
+BaseModel = declarative_base()
+BaseModel.query = database_session.query_property()
 
-def init_db():
+def initialize_database():
     try:
-        import your_models_here
-        Base.metadata.create_all(bind=engine)
-    except Exception as e:
-        print(f"Error initializing the database: {e}")
+        import models
+        BaseModel.metadata.create_all(bind=database_engine)
+    except Exception as error:
+        print(f"Error initializing the database: {error}")
 
-def get_db_session():
+def get_database_session():
     try:
-        return db_session
-    except SQLAlchemyError as e:
-        print(f"Error getting DB session: {e}")
+        return database_session
+    except SQLAlchemyError as error:
+        print(f"Error getting DB session: {error}")
         return None
 
-class ExampleModel(Base):
-    __tablename__ = 'example_model'
+class NoteModel(BaseModel):
+    __tablename__ = 'note_model'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    title = Column(String(50))
 
-def create_example_model(name):
+def add_note_model(title):
     try:
-        example = ExampleModel(name=name)
-        db_session.add(example)
-        db_session.commit()
-    except SQLAlchemyError as e:
-        db_session.rollback()
-        print(f"Error creating ExampleModel: {e}")
+        note = NoteModel(title=title)
+        database_session.add(note)
+        database_session.commit()
+    except SQLAlchemyError as error:
+        database_session.rollback()
+        print(f"Error adding NoteModel: {error}")
 
-def main():
-    init_db()
-    create_example_model('Test Name')
+def run_demo():
+    initialize_database()
+    add_note_model('Demo Note Title')
 
 if __name__ == '__main__':
-    main()
+    run_demo()
