@@ -1,24 +1,37 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import NoteList from './NoteList';
-import NoteDetail from './NoteDetail';
-import CreateNote from './CreateNote';
-import NotebookList from './NotebookList';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function App() {
-  return (
-    <Router>
+// Example: A simplified global cache to avoid refetching data
+const globalCache = {};
+
+function NoteList() {
+    const [notes, setNotes] = useState([]);
+
+    useEffect(() => {
+        const fetchNotes = async () => {
+            const cacheKey = 'notes';
+            if (globalCache[cacheKey]) {
+              setNotes(globalCache[cacheKey]);
+              return;
+            }
+            
+            try {
+                const response = await axios.get('https://your.api/notes');
+                globalCache[cacheKey] = response.data;
+                setNotes(response.data);
+            } catch (error) {
+                console.error("Failed to fetch notes:", error);
+            }
+        };
+
+        fetchNotes();
+    }, []);
+
+    return (
       <div>
-        <Switch>
-          <Route path="/noteList" exact component={NoteList} />
-          <Route path="/noteDetail/:id" component={NoteDetail} />
-          <Route path="/createNote" component={CreateNote} />
-          <Route path="/notebookList" component={NotebookList} />
-          <Route path="/" exact component={NoteList} />
-        </Switch>
+        {notes.map(note => (
+          <div key={note.id}>{note.title}</div>
+        ))}
       </div>
-    </Router>
-  );
+    );
 }
-
-export default App;
